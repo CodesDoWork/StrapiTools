@@ -121,4 +121,4 @@ const makeCreateTypeEntryString = ({ name, type, isRequired, isProvided }: TypeE
 const makeEnumString = ({ name, values }: StrapiEnum) =>
     `export enum ${name} {\n${values
         .map(value => `    ${toPascalCase(value)} = "${value}"`)
-        .join(",\n")}\n};`;
+        .join(",\n")}\n}`;
