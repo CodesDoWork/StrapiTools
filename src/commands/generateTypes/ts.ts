@@ -32,6 +32,28 @@ export const generateTypes = async ({ url, email, password, output }: GenerateTy
             ))
     );
 
+    const userLoginType: Type = {
+        id: "custom::UserLogin",
+        name: "UserLoginForm",
+        entries: [
+            {
+                name: "identifier",
+                type: "string",
+                isRequired: true,
+                isProvided: false,
+                isPrivate: false,
+            },
+            {
+                name: "password",
+                type: "string",
+                isRequired: true,
+                isProvided: false,
+                isPrivate: false,
+            },
+        ],
+    };
+    content += `\n\n${makeTypeString(userLoginType)}`;
+
     const strapiEnums = types.reduce(
         (all, type) => [
             ...all,
@@ -116,7 +138,13 @@ const makeCreateTypeString = ({ name, entries }: Type) =>
     `export type Create${name}Form = {\n${entries.map(makeCreateTypeEntryString).join("\n")}\n};`;
 
 const makeCreateTypeEntryString = ({ name, type, isRequired, isProvided }: TypeEntry) =>
-    `    ${name}${isRequired && !isProvided ? "" : "?"}: ${isStrapiEnum(type) ? type.name : type};`;
+    `    ${name}${isRequired && !isProvided ? "" : "?"}: ${
+        isStrapiEnum(type)
+            ? type.name
+            : type.includes("::")
+            ? `${type} | number${type.includes("[]") ? "[]" : ""}`
+            : type
+    };`;
 
 const makeEnumString = ({ name, values }: StrapiEnum) =>
     `export enum ${name} {\n${values
