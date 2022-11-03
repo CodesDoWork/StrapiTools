@@ -1,4 +1,4 @@
-import { GenerateTypesOptions, Type, TypeEntry } from "./types";
+import { GenerateTypesOptions, StrapiEnum, Type, TypeEntry } from "./types";
 import { StrapiClient } from "../../StrapiClient";
 import {
     Attribute,
@@ -9,8 +9,9 @@ import {
     EnumAttribute,
     RelationAttribute,
 } from "../../strapi-types";
-import { escapeRegExp, saveFile } from "../../utils";
+import { escapeRegExp, saveFile, toPascalCase } from "../../utils";
 import { mapPluginName } from "../../strapi-utils";
+import { isStrapiEnum } from "./typeguards";
 
 export const generateTypes = async ({ url, email, password, output }: GenerateTypesOptions) => {
     const client = new StrapiClient(url);
@@ -31,14 +32,27 @@ export const generateTypes = async ({ url, email, password, output }: GenerateTy
             ))
     );
 
+    const strapiEnums = types.reduce(
+        (all, type) => [
+            ...all,
+            ...type.entries
+                .filter(entry => isStrapiEnum(entry.type))
+                .map(entry => makeEnumString(entry.type as StrapiEnum)),
+        ],
+        [] as string[]
+    );
+    content += `\n\n${strapiEnums.join("\n\n")}`;
+
     saveFile(output, content + "\n");
 };
 
 const makeType = (collection: ContentType | Component): Type => {
+    const typename =
+        mapPluginName(collection.plugin) + collection.schema.displayName.replace(/ /g, "");
     const entries: TypeEntry[] = Object.entries(collection.schema.attributes).map(
         ([name, attribute]) => ({
             name,
-            type: mapTypeEntryType(attribute),
+            type: mapTypeEntryType(name, attribute, typename),
             isRequired: !!attribute.required,
             isProvided: attribute.default !== undefined,
             isPrivate: attribute.private || false,
@@ -47,12 +61,16 @@ const makeType = (collection: ContentType | Component): Type => {
 
     return {
         id: collection.uid,
-        name: mapPluginName(collection.plugin) + collection.schema.displayName.replace(/ /g, ""),
+        name: typename,
         entries,
     };
 };
 
-const mapTypeEntryType = (attribute: Attribute): string => {
+const mapTypeEntryType = (
+    name: string,
+    attribute: Attribute,
+    typename: string
+): string | StrapiEnum => {
     switch (attribute.type) {
         case "datetime":
         case "text":
@@ -76,7 +94,7 @@ const mapTypeEntryType = (attribute: Attribute): string => {
             return `(${components.join(" | ")})[]`;
         case "enumeration":
             const { enum: values } = attribute as EnumAttribute;
-            return values.map(value => `"${value}"`).join(" | ");
+            return { name: typename + toPascalCase(name), values };
         default:
             return attribute.type;
     }
@@ -92,10 +110,15 @@ const makeTypeString = ({ name, entries }: Type) =>
         .join("\n")}\n};`;
 
 const makeTypeEntryString = ({ name, type, isRequired }: TypeEntry) =>
-    `    ${name}: ${type}${isRequired ? "" : " | null"};`;
+    `    ${name}: ${isStrapiEnum(type) ? type.name : type}${isRequired ? "" : " | null"};`;
 
 const makeCreateTypeString = ({ name, entries }: Type) =>
     `export type Create${name}Form = {\n${entries.map(makeCreateTypeEntryString).join("\n")}\n};`;
 
 const makeCreateTypeEntryString = ({ name, type, isRequired, isProvided }: TypeEntry) =>
-    `    ${name}${isRequired && !isProvided ? "" : "?"}: ${type};`;
+    `    ${name}${isRequired && !isProvided ? "" : "?"}: ${isStrapiEnum(type) ? type.name : type};`;
+
+const makeEnumString = ({ name, values }: StrapiEnum) =>
+    `export enum ${name} {\n${values
+        .map(value => `    ${toPascalCase(value)} = "${value}"`)
+        .join(",\n")}\n};`;

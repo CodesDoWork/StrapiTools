@@ -13,8 +13,13 @@ export type Type = {
 
 export type TypeEntry = {
     name: string;
-    type: string;
+    type: string | StrapiEnum;
     isRequired: boolean;
     isProvided: boolean;
     isPrivate: boolean;
+};
+
+export type StrapiEnum = {
+    name: string;
+    values: string[];
 };
