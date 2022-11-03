@@ -123,7 +123,7 @@ const mapTypeEntryType = (
 };
 
 const buildTypesFile = (types: Type[]) =>
-    types.map(type => `${makeTypeString(type)}\n\n${makeCreateTypeString(type)}`).join("\n\n");
+    types.map(type => `${makeTypeString(type)}\n\n${makeSendTypeString(type)}`).join("\n\n");
 
 const makeTypeString = ({ name, entries }: Type) =>
     `export type ${name} = {\n${entries
@@ -134,10 +134,10 @@ const makeTypeString = ({ name, entries }: Type) =>
 const makeTypeEntryString = ({ name, type, isRequired }: TypeEntry) =>
     `    ${name}: ${isStrapiEnum(type) ? type.name : type}${isRequired ? "" : " | null"};`;
 
-const makeCreateTypeString = ({ name, entries }: Type) =>
-    `export type Create${name}Form = {\n${entries.map(makeCreateTypeEntryString).join("\n")}\n};`;
+const makeSendTypeString = ({ name, entries }: Type) =>
+    `export type Send${name}Form = {\n${entries.map(makeSendTypeEntryString).join("\n")}\n};`;
 
-const makeCreateTypeEntryString = ({ name, type, isRequired, isProvided }: TypeEntry) =>
+const makeSendTypeEntryString = ({ name, type, isRequired, isProvided }: TypeEntry) =>
     `    ${name}${isRequired && !isProvided ? "" : "?"}: ${
         isStrapiEnum(type)
             ? type.name
