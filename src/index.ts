@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 
 import { program } from "commander";
-import { generateTypes } from "./generateTypes";
+import { generateTypes } from "./commands/generateTypes/ts";
 
 program.name("strapi_tools").description("A CLI for strapi utility functions.").version("0.1.0");
 
