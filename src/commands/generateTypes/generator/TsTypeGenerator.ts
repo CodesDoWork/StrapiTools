@@ -1,7 +1,9 @@
 import { TypeGenerator } from "./TypeGenerator";
 import {
     Attribute,
+    Component,
     ComponentAttribute,
+    ContentType,
     DynamicZoneAttribute,
     RelationAttribute,
 } from "../../../strapi-types";
@@ -17,7 +19,7 @@ export class TsTypeGenerator extends TypeGenerator {
     protected mapTypeEntryType = (
         name: string,
         attribute: Attribute,
-        typename: string,
+        collection: Component | ContentType,
         isToSend: boolean
     ): TypeEntryType => {
         let type: TypeEntryType;
@@ -56,7 +58,7 @@ export class TsTypeGenerator extends TypeGenerator {
                 type = { types: [{ types: components, isArray: true }] };
                 break;
             case "enumeration":
-                type = { types: [this.getEnumName(name, typename)] };
+                type = { types: [this.getEnumName(name, collection)] };
                 break;
             default:
                 type = { types: [attribute.type] };

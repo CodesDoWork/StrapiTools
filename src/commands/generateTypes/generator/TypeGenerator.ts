@@ -75,16 +75,12 @@ export abstract class TypeGenerator {
         collection: ContentType | Component,
         isToSend = false
     ): GeneratedType[] => {
-        let typename =
-            mapPluginName(collection.plugin) + collection.schema.displayName.replace(/ /g, "");
-        if (isToSend) {
-            typename = `Send${typename}Form`;
-        }
+        const typename = this.getTypeName(collection, isToSend);
 
         const entries: TypeEntry[] = Object.entries(collection.schema.attributes).map(
             ([name, attribute]) => ({
                 name,
-                type: this.mapTypeEntryType(name, attribute, typename, isToSend),
+                type: this.mapTypeEntryType(name, attribute, collection, isToSend),
                 isRequired: !!attribute.required,
                 isOptional: isToSend && (!attribute.required || attribute.default !== undefined),
                 isPrivate: attribute.private || false,
@@ -99,12 +95,14 @@ export abstract class TypeGenerator {
             isPrivate: false,
         });
 
-        const enums = Object.entries(collection.schema.attributes)
-            .filter(([, attribute]) => attribute.type === "enumeration")
-            .map(([name, attribute]) => {
-                const { enum: values } = attribute as EnumAttribute;
-                return { name: this.getEnumName(name, typename), values };
-            });
+        const enums = isToSend
+            ? []
+            : Object.entries(collection.schema.attributes)
+                  .filter(([, attribute]) => attribute.type === "enumeration")
+                  .map(([name, attribute]) => {
+                      const { enum: values } = attribute as EnumAttribute;
+                      return { name: this.getEnumName(name, collection), values };
+                  });
 
         return [
             {
@@ -120,12 +118,22 @@ export abstract class TypeGenerator {
     protected abstract mapTypeEntryType: (
         name: string,
         attribute: Attribute,
-        typename: string,
+        collection: Component | ContentType,
         isToSend: boolean
     ) => TypeEntryType;
 
-    protected getEnumName(attributeName: string, typename: string): string {
-        return typename + toPascalCase(attributeName);
+    protected getEnumName(attributeName: string, collection: Component | ContentType): string {
+        return this.getTypeName(collection, false) + toPascalCase(attributeName);
+    }
+
+    protected getTypeName(collection: Component | ContentType, isToSend: boolean): string {
+        let typename =
+            mapPluginName(collection.plugin) + collection.schema.displayName.replace(/ /g, "");
+        if (isToSend) {
+            typename = `Send${typename}Form`;
+        }
+
+        return typename;
     }
 
     protected abstract stringifyTypes: (types: GeneratedType[]) => string[];
