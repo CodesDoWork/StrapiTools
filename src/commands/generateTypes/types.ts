@@ -8,18 +8,26 @@ export type GenerateTypesOptions = {
 export type Type = {
     id: string;
     name: string;
+    isToSend: boolean;
     entries: TypeEntry[];
 };
 
 export type TypeEntry = {
     name: string;
-    type: string | StrapiEnum;
+    type: TypeEntryType;
     isRequired: boolean;
-    isProvided: boolean;
+    isOptional: boolean;
     isPrivate: boolean;
+};
+
+export type TypeEntryType = {
+    types: (TypeEntryType | string)[];
+    isArray?: boolean;
 };
 
 export type StrapiEnum = {
     name: string;
     values: string[];
 };
+
+export type GeneratedType = Type | StrapiEnum;
