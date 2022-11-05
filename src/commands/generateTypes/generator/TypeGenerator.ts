@@ -3,6 +3,7 @@ import { StrapiClient } from "../../../StrapiClient";
 import { Attribute, Component, ContentType, EnumAttribute } from "../../../strapi-types";
 import { mapPluginName } from "../../../strapi-utils";
 import { saveFile, toPascalCase } from "../../../utils";
+import { isContentType } from "../typeguards";
 
 export abstract class TypeGenerator {
     private readonly client: StrapiClient;
@@ -87,13 +88,15 @@ export abstract class TypeGenerator {
             })
         );
 
-        entries.push({
-            name: "id",
-            type: { types: ["number"] },
-            isRequired: !isToSend,
-            isOptional: isToSend,
-            isPrivate: false,
-        });
+        if (isContentType(collection)) {
+            entries.push({
+                name: "id",
+                type: { types: ["number"] },
+                isRequired: !isToSend,
+                isOptional: isToSend,
+                isPrivate: false,
+            });
+        }
 
         const enums = isToSend
             ? []
