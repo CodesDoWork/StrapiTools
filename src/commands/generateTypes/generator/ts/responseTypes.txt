@@ -1,5 +1,3 @@
-export type StrapiResponse<T> = DataResponse<StrapiObject<T>>;
-
 export type DataResponse<T> = {
     data: T;
 };
@@ -12,11 +10,11 @@ export type StrapiObject<T> = {
     };
 };
 
-export type CollectionFindResponse<T> = StrapiResponse<T[]> & {
+export type CollectionFindResponse<T> = DataResponse<StrapiObject<T>[]> & {
     meta: Pagination;
 };
 
-export type CollectionFindOneResponse<T> = StrapiResponse<T> & {
+export type CollectionFindOneResponse<T> = DataResponse<StrapiObject<T>> & {
     meta: {};
 };
 
