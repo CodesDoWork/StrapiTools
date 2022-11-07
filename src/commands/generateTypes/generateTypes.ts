@@ -1,5 +1,5 @@
 import { GenerateTypesOptions } from "./types";
-import { TsTypeGenerator } from "./generator/TsTypeGenerator";
+import { TsTypeGenerator } from "./generator/ts/TsTypeGenerator";
 
 export const generateTypes = async ({ url, email, password, output }: GenerateTypesOptions) => {
     const generator = new TsTypeGenerator(url);

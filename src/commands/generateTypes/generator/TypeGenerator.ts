@@ -4,6 +4,7 @@ import { Attribute, Component, ContentType, EnumAttribute } from "../../../strap
 import { mapPluginName } from "../../../strapi-utils";
 import { saveFile, toPascalCase } from "../../../utils";
 import { isContentType } from "../typeguards";
+import { extraTypes } from "../extraTypes";
 
 export abstract class TypeGenerator {
     private readonly client: StrapiClient;
@@ -38,29 +39,7 @@ export abstract class TypeGenerator {
                 )
             );
 
-        const userLoginType: Type = {
-            id: "custom::UserLogin",
-            name: "UserLoginForm",
-            isToSend: true,
-            entries: [
-                {
-                    name: "identifier",
-                    type: { types: ["string"] },
-                    isRequired: true,
-                    isOptional: false,
-                    isPrivate: false,
-                },
-                {
-                    name: "password",
-                    type: { types: ["string"] },
-                    isRequired: true,
-                    isOptional: false,
-                    isPrivate: false,
-                },
-            ],
-        };
-
-        const types = [...componentTypes, ...contentTypeTypes, userLoginType];
+        const types = [...componentTypes, ...contentTypeTypes, ...Object.values(extraTypes)];
 
         return types.sort((t1, t2) => t1.name.localeCompare(t2.name));
     }
@@ -83,7 +62,7 @@ export abstract class TypeGenerator {
                 name,
                 type: this.mapTypeEntryType(name, attribute, collection, isToSend),
                 isRequired: !!attribute.required,
-                isOptional: isToSend && (!attribute.required || attribute.default !== undefined),
+                isOptional: !attribute.required || attribute.default !== undefined,
                 isPrivate: attribute.private || false,
             })
         );
@@ -94,7 +73,7 @@ export abstract class TypeGenerator {
                 type: { types: ["number"] },
                 isRequired: !isToSend,
                 isOptional: isToSend,
-                isPrivate: false,
+                isPrivate: true,
             });
         }
 

@@ -1,0 +1,42 @@
+export type StrapiResponse<T> = DataResponse<StrapiObject<T>>;
+
+export type DataResponse<T> = {
+    data: T;
+};
+
+export type StrapiObject<T> = {
+    id: number;
+    attributes: T & {
+        createdAt: string;
+        updatedAt: string;
+    };
+};
+
+export type CollectionFindResponse<T> = StrapiResponse<T[]> & {
+    meta: Pagination;
+};
+
+export type CollectionFindOneResponse<T> = StrapiResponse<T> & {
+    meta: {};
+};
+
+export type Pagination = {
+    pagination: {
+        page: number;
+        pageSize: number;
+        pageCount: number;
+        total: number;
+    };
+};
+
+export type StrapiErrorResponse = {
+    data: null;
+    error: StrapiError;
+};
+
+export type StrapiError = {
+    details: object;
+    message: string;
+    name: string;
+    status: number;
+};
