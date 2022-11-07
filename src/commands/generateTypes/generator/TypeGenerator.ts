@@ -1,4 +1,4 @@
-import { GeneratedType, Type, TypeEntry, TypeEntryType } from "../types";
+import { GeneratedType, TypeEntry, TypeEntryType } from "../types";
 import { StrapiClient } from "../../../StrapiClient";
 import { Attribute, Component, ContentType, EnumAttribute } from "../../../strapi-types";
 import { mapPluginName } from "../../../strapi-utils";
@@ -73,7 +73,7 @@ export abstract class TypeGenerator {
                 type: { types: ["number"] },
                 isRequired: !isToSend,
                 isOptional: isToSend,
-                isPrivate: true,
+                isPrivate: collection.uid !== "plugin::users-permissions.user",
             });
         }
 
