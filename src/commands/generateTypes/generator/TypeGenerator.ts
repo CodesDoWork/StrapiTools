@@ -62,7 +62,7 @@ export abstract class TypeGenerator {
                 name,
                 type: this.mapTypeEntryType(name, attribute, collection, isToSend),
                 isRequired: !!attribute.required,
-                isOptional: !attribute.required || attribute.default !== undefined,
+                isOptional: !attribute.required && attribute.default === undefined,
                 isPrivate: attribute.private || false,
             })
         );
