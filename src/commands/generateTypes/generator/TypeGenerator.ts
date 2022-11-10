@@ -4,7 +4,6 @@ import { Attribute, Component, ContentType, EnumAttribute } from "../../../strap
 import { mapPluginName } from "../../../strapi-utils";
 import { saveFile, toPascalCase } from "../../../utils";
 import { isContentType } from "../typeguards";
-import { extraTypes } from "../extraTypes";
 
 export abstract class TypeGenerator {
     private readonly client: StrapiClient;
@@ -39,7 +38,7 @@ export abstract class TypeGenerator {
                 )
             );
 
-        const types = [...componentTypes, ...contentTypeTypes, ...Object.values(extraTypes)];
+        const types = [...componentTypes, ...contentTypeTypes];
 
         return types.sort((t1, t2) => t1.name.localeCompare(t2.name));
     }

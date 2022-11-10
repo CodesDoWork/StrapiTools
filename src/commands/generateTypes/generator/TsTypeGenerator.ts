@@ -1,4 +1,4 @@
-import { TypeGenerator } from "../TypeGenerator";
+import { TypeGenerator } from "./TypeGenerator";
 import {
     Attribute,
     Component,
@@ -6,12 +6,10 @@ import {
     ContentType,
     DynamicZoneAttribute,
     RelationAttribute,
-} from "../../../../strapi-types";
-import { GeneratedType, StrapiEnum, Type, TypeEntry, TypeEntryType } from "../../types";
-import { escapeRegExp, toPascalCase } from "../../../../utils";
-import { isType } from "../../typeguards";
-import * as fs from "fs";
-import path from "path";
+} from "../../../strapi-types";
+import { GeneratedType, StrapiEnum, Type, TypeEntry, TypeEntryType } from "../types";
+import { escapeRegExp, toPascalCase } from "../../../utils";
+import { isType } from "../typeguards";
 
 export class TsTypeGenerator extends TypeGenerator {
     constructor(url: string) {
@@ -69,8 +67,8 @@ export class TsTypeGenerator extends TypeGenerator {
         return type;
     };
 
-    protected stringifyTypes = (types: GeneratedType[]) => {
-        const typeStrings = types.map(type => {
+    protected stringifyTypes = (types: GeneratedType[]) =>
+        types.map(type => {
             if (isType(type)) {
                 let typeString = makeTypeString(type);
                 types
@@ -88,13 +86,6 @@ export class TsTypeGenerator extends TypeGenerator {
                 return makeEnumString(type);
             }
         });
-
-        typeStrings.push(
-            fs.readFileSync(path.resolve(__dirname, "./responseTypes.txt")).toString()
-        );
-
-        return typeStrings;
-    };
 }
 
 const makeTypeString = ({ name, entries, isToSend }: Type) =>

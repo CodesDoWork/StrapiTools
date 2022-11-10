@@ -1,15 +1,30 @@
 {
-    "name": "strapi_tools",
+    "name": "@codesdowork/strapi_tools",
     "version": "0.1.2",
-    "author": "Justin Konratt",
+    "author": "Justin Konratt <codesdowork@gmail.com> (https://github.com/CodesDoWork)",
+    "license": "ISC",
+    "keywords": [
+        "strapi",
+        "tools",
+        "types",
+        "nodejs"
+    ],
+    "homepage": "https://github.com/CodesDoWork/StrapiTools",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/CodesDoWork/StrapiTools.git"
+    },
+    "bugs": {
+        "url": "https://github.com/CodesDoWork/StrapiTools/issues"
+    },
     "main": "./lib/index.js",
     "bin": {
         "strapi_tools": "./lib/index.js"
     },
     "scripts": {
-        "build": "tsc -p . && npm run copy",
-        "copy": "copyfiles -u 1 ./src/**/*.txt ./lib",
-        "global": "npm i -g ."
+        "build": "tsc -p .",
+        "global": "npm i -g .",
+        "patch": "npm run build && npm version patch && npm publish --access public"
     },
     "dependencies": {
         "axios": "^1.1.3",
@@ -18,7 +33,6 @@
     },
     "devDependencies": {
         "@types/node": "^18.11.9",
-        "copyfiles": "^2.4.1",
         "prettier": "^2.7.1",
         "typescript": "^4.8.4"
     }
