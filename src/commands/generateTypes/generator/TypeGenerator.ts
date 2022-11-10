@@ -64,7 +64,7 @@ export abstract class TypeGenerator {
                 isRequired: !!attribute.required,
                 isOptional:
                     (isToSend && (!attribute.required || attribute.default !== undefined)) ||
-                    (!isToSend && !attribute.required && attribute.default !== undefined),
+                    (!isToSend && !attribute.required && attribute.default === undefined),
                 isPrivate: attribute.private || false,
             })
         );
