@@ -74,6 +74,25 @@ export abstract class TypeGenerator {
                 isOptional: isToSend,
                 isPrivate: false,
             });
+
+            if (!isToSend) {
+                entries.push(
+                    {
+                        name: "createdAt",
+                        type: { types: ["string"] },
+                        isRequired: true,
+                        isOptional: false,
+                        isPrivate: false,
+                    },
+                    {
+                        name: "updatedAt",
+                        type: { types: ["string"] },
+                        isRequired: true,
+                        isOptional: false,
+                        isPrivate: false,
+                    }
+                );
+            }
         }
 
         const enums = isToSend
