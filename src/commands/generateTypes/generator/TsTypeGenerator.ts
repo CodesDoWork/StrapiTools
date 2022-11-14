@@ -64,6 +64,13 @@ export class TsTypeGenerator extends TypeGenerator {
                 type = { types: [attribute.type] };
         }
 
+        if (
+            (isToSend && (!attribute.required || attribute.default !== undefined)) ||
+            (!isToSend && !attribute.required && attribute.default === undefined)
+        ) {
+            type.types.push({ types: ["null"] });
+        }
+
         return type;
     };
 
