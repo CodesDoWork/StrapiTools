@@ -1,4 +1,4 @@
-import { GeneratedType, TypeEntry, TypeEntryType } from "../types";
+import { GeneratedType, Type, TypeEntry, TypeEntryType } from "../types";
 import { StrapiClient } from "../../../StrapiClient";
 import { Attribute, Component, ContentType, EnumAttribute } from "../../../strapi-types";
 import { mapPluginName } from "../../../strapi-utils";
@@ -38,9 +38,49 @@ export abstract class TypeGenerator {
                 )
             );
 
-        const types = [...componentTypes, ...contentTypeTypes];
+        const types = [
+            ...componentTypes,
+            ...contentTypeTypes,
+            this.makeStrapiTypesType(contentTypeTypes),
+        ];
 
         return types.sort((t1, t2) => t1.name.localeCompare(t2.name));
+    }
+
+    private makeStrapiTypesType(contentTypeTypes: GeneratedType[]): Type {
+        const strapiTypesRegex = /^(api::.+|plugin::(users-permissions\.user|upload\.file))$/;
+        const strapiTypesTypes = contentTypeTypes.filter(
+            type => "id" in type && strapiTypesRegex.test(type.id)
+        ) as Type[];
+
+        const indent = " ".repeat(4);
+        const greatIndent = indent.repeat(2);
+        const makeGetSendTypeString = (typeId: string) =>
+            `{\n${greatIndent}get: ${typeId};\n${greatIndent}send: send::${typeId};\n${indent}}`;
+
+        const makeCollectionName = (name: string) => {
+            const basic = name[0].toLowerCase() + name.substring(1);
+            if (["user", "strapiFile"].includes(basic)) {
+                return basic;
+            }
+
+            const collectionName = basic.replace(/[A-Z]/g, "-$&").toLowerCase();
+
+            return collectionName.includes("-") ? `"${collectionName}"` : collectionName;
+        };
+
+        return {
+            id: "result::strapiTypes",
+            name: "StrapiTypes",
+            isToSend: false,
+            entries: strapiTypesTypes.map(({ name, id }) => ({
+                name: makeCollectionName(name),
+                type: { types: [makeGetSendTypeString(id)] },
+                isPrivate: false,
+                isOptional: false,
+                isRequired: true,
+            })),
+        };
     }
 
     async generateTypes(output: string) {
