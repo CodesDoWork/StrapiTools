@@ -12,6 +12,10 @@ export type Type = {
     entries: TypeEntry[];
 };
 
+export type CollectionType = Type & {
+    pluralName: string;
+};
+
 export type TypeEntry = {
     name: string;
     type: TypeEntryType;
@@ -30,4 +34,4 @@ export type StrapiEnum = {
     values: string[];
 };
 
-export type GeneratedType = Type | StrapiEnum;
+export type GeneratedType = Type | CollectionType | StrapiEnum;

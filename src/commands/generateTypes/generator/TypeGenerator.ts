@@ -1,4 +1,4 @@
-import { GeneratedType, Type, TypeEntry, TypeEntryType } from "../types";
+import { CollectionType, GeneratedType, Type, TypeEntry, TypeEntryType } from "../types";
 import { StrapiClient } from "../../../StrapiClient";
 import { Attribute, Component, ContentType, EnumAttribute } from "../../../strapi-types";
 import { mapPluginName } from "../../../strapi-utils";
@@ -50,31 +50,20 @@ export abstract class TypeGenerator {
     private makeStrapiTypesType(contentTypeTypes: GeneratedType[]): Type {
         const strapiTypesRegex = /^(api::.+|plugin::(users-permissions\.user|upload\.file))$/;
         const strapiTypesTypes = contentTypeTypes.filter(
-            type => "id" in type && strapiTypesRegex.test(type.id)
-        ) as Type[];
+            type => "pluralName" in type && strapiTypesRegex.test(type.id)
+        ) as CollectionType[];
 
         const indent = " ".repeat(4);
         const greatIndent = indent.repeat(2);
         const makeGetSendTypeString = (typeId: string) =>
             `{\n${greatIndent}get: ${typeId};\n${greatIndent}send: send::${typeId};\n${indent}}`;
 
-        const makeCollectionName = (name: string) => {
-            const basic = name[0].toLowerCase() + name.substring(1);
-            if (["user", "strapiFile"].includes(basic)) {
-                return basic;
-            }
-
-            const collectionName = basic.replace(/[A-Z]/g, "-$&").toLowerCase();
-
-            return collectionName.includes("-") ? `"${collectionName}"` : collectionName;
-        };
-
         return {
             id: "result::strapiTypes",
             name: "StrapiTypes",
             isToSend: false,
-            entries: strapiTypesTypes.map(({ name, id }) => ({
-                name: makeCollectionName(name),
+            entries: strapiTypesTypes.map(({ pluralName, id }) => ({
+                name: pluralName,
                 type: { types: [makeGetSendTypeString(id)] },
                 isPrivate: false,
                 isOptional: false,
@@ -95,6 +84,7 @@ export abstract class TypeGenerator {
         isToSend = false
     ): GeneratedType[] => {
         const typename = this.getTypeName(collection, isToSend);
+        let pluralName: string | undefined;
 
         const entries: TypeEntry[] = Object.entries(collection.schema.attributes).map(
             ([name, attribute]) => ({
@@ -107,6 +97,14 @@ export abstract class TypeGenerator {
         );
 
         if (isContentType(collection)) {
+            const prefix = mapPluginName(collection.plugin);
+            pluralName = prefix
+                ? `${prefix.toLowerCase()}-${collection.schema.pluralName}`
+                : collection.schema.pluralName;
+            if (pluralName.includes("-")) {
+                pluralName = `"${pluralName}"`;
+            }
+
             entries.push({
                 name: "id",
                 type: { types: ["number"] },
@@ -148,6 +146,7 @@ export abstract class TypeGenerator {
             {
                 id: (isToSend ? "send::" : "") + collection.uid,
                 name: typename,
+                pluralName,
                 isToSend,
                 entries,
             },
